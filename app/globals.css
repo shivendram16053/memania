@@ -9,10 +9,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #FFBB03;
+    --background: linear-gradient(450deg, #8a2be2, #4b6cb7); /* purple → blue */
     --foreground: #ededed;
   }
 }
+
 
 body {
   color: var(--foreground);

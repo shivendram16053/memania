@@ -50,12 +50,12 @@ const NFTModal: React.FC<NFTModalProps> = ({ closeModal, selectedNFT ,owner }) =
           <div className="mt-5 text-lg flex flex-col items-start gap-3">
           <p className="text-stone-950"><strong>Prompt : </strong><span>{selectedNFT.description}</span></p>
             <p className="text-gray-600">
-              <strong>Blockchain:</strong> Fuji (43113)
+              <strong>Blockchain:</strong> Somnia Testnet
             </p>
             <p className="text-gray-600">
               <strong>Contract:</strong>{" "}
               <a
-                href={`https://testnet.snowtrace.io/address/${selectedNFT.contract}`}
+                href={`https://shannon-explorer.somnia.network/address/${selectedNFT.contract}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
@@ -66,16 +66,13 @@ const NFTModal: React.FC<NFTModalProps> = ({ closeModal, selectedNFT ,owner }) =
             <p className="text-gray-600">
               <strong>Created By: </strong> 
               <a
-                href={`https://testnet.snowtrace.io/address/${selectedNFT.creator}`}
+                href={`https://shannon-explorer.somnia.network/address/${selectedNFT.creator}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
               >
                 {selectedNFT.creator}
               </a>
-            </p>
-            <p className="text-gray-600">
-              <strong>Token Standard:</strong> ERC-721
             </p>
           </div>
 

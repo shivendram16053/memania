@@ -120,7 +120,7 @@ const BuyNFT = () => {
               />
             )}
             <p className="text-lg text-black font-semibold">{nftData[tokenId]?.title || `MeMania NFT #${tokenId}`}</p>
-            <p className="text-md text-gray-700">Price: {nftData[tokenId]?.priceInEth} ETH</p>
+            <p className="text-md text-gray-700">Price: {nftData[tokenId]?.priceInEth} STT</p>
             <button
               onClick={() => buyNFT(tokenId, nftData[tokenId]?.priceInEth as string)}
               disabled={loading.buying[tokenId] || !nftData[tokenId]?.priceInEth}

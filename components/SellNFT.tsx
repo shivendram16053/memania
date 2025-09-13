@@ -153,7 +153,7 @@ const SellNFT = () => {
               <>
                 <input
                   type="number"
-                  placeholder="Price in Eth"
+                  placeholder="Price in STT"
                   value={prices[tokenId] || ""}
                   onChange={(e) => handlePriceChange(tokenId, e.target.value)}
                   className="w-full p-2 border border-black outline-none text-black rounded mb-2"

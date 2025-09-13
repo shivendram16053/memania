@@ -124,7 +124,7 @@ const GalleryPage = () => {
                 <p className="text-gray-500 text-sm">
                   Created by:{" "}
                   <a
-                    href={`https://testnet.snowtrace.io/address/${nft.creator}`}
+                    href={`https://shannon-explorer.somnia.network/address/${nft.creator}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"

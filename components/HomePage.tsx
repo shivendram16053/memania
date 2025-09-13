@@ -47,16 +47,6 @@ const HomePage = () => {
     }
   };
 
-  const handleDownload = () => {
-    if (!imageUrl) return;
-    const link = document.createElement("a");
-    link.href = imageUrl;
-    link.download = `${input}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleMint = async () => {
     try {
       if (!imageUrl) throw new Error("Please generate an image first.");
@@ -83,7 +73,7 @@ const HomePage = () => {
       setMinting("Waiting for Confirmation...");
       const receipt = await tx.wait();
   
-      setExplorerLink(`https://testnet.snowtrace.io/tx/${tx.hash}?chainid=43113`);
+      setExplorerLink(`https://shannon-explorer.somnia.network/tx/${tx.hash}?chainid=43113`);
       setMinting("Minted Successfully!");
     } catch (error) {
       console.error("Minting failed:", error);
@@ -115,11 +105,8 @@ const HomePage = () => {
       ) : imageUrl ? (
         <div className="flex flex-col items-center mt-10">
           <img src={imageUrl} alt="Generated Meme" className="w-[512px] h-[512px] rounded-lg shadow-lg" />
-          <div className="flex gap-5 mt-5 w-full">
-            <button onClick={handleDownload} className="bg-white w-1/2 border border-black rounded-md text-black font-bold py-2 px-4 hover:bg-black hover:text-white transition-all">
-              Download
-            </button>
-            <button onClick={handleMint} className="bg-yellow-400 w-1/2 border border-black rounded-md text-black font-bold py-2 px-4 hover:bg-black hover:text-white transition-all">
+          <div className="flex justify-center gap-5 mt-5 w-full">
+            <button onClick={handleMint} className="bg-black w-1/2 border border-black rounded-md text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all">
               {minting}
             </button>
           </div>

@@ -18,7 +18,8 @@ const LandingPage = () => {
           Meme Your Way to the Moon!
         </h1>
         <p className="text-2xl text-gray-800 leading-relaxed">
-          Create & Mint Your Own <span className="font-bold text-black">Memecoin</span> Instantly with AI on <span className="font-bold">Somania Chain</span>.
+          Create & Mint Your Own <span className="font-bold text-black">NFT</span>
+          <br/> Instantly with AI on <span className="font-bold">Somnia Chain</span>.
         </p>
 
         <button
