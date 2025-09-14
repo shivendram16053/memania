@@ -7,7 +7,6 @@ interface NFT {
   tokenId: number;
   description: string;
   creator: string;
-  contractAddress: string;
   transfers?: { hash: string; age: string }[];
 }
 

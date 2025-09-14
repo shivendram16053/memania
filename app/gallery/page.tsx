@@ -9,12 +9,23 @@ import NFTmodal from "@/components/NFTmodal";
 
 const CA = process.env.NEXT_PUBLIC_SMART_CONTRACT as `0x${string}`;
 
+// ✅ Define a proper NFT type
+interface NFTData {
+  tokenId: number;
+  contract: string;
+  title: string;
+  description: string;
+  image: string;
+  creator: string;
+  owner: string;
+}
+
 const GalleryPage = () => {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [nfts, setNfts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedNFT, setSelectedNFT] = useState<any | null>(null); // Modal state
+  const [nfts, setNfts] = useState<NFTData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedNFT, setSelectedNFT] = useState<NFTData | null>(null); // Modal state
 
   useEffect(() => {
     const fetchNFTs = async () => {
@@ -29,7 +40,7 @@ const GalleryPage = () => {
         const tokenIds: number[] = await contract.getAllNFTs();
 
         // Fetch details for each NFT
-        const nftDetails = await Promise.all(
+        const nftDetails: NFTData[] = await Promise.all(
           tokenIds.map(async (tokenId) => {
             const [title, description, metadataURI, creator, owner] =
               await contract.getNFTDetails(tokenId);
@@ -44,7 +55,7 @@ const GalleryPage = () => {
                 contract: CA,
                 title: metadata.name || title,
                 description: metadata.description || description,
-                image: metadata.image || "", // Ensure image exists
+                image: metadata.image || "",
                 creator,
                 owner,
               };
@@ -53,7 +64,15 @@ const GalleryPage = () => {
                 `Failed to load metadata for Token ID ${tokenId}:`,
                 err
               );
-              return { tokenId, title, description, image: "", creator };
+              return {
+                tokenId,
+                contract: CA,
+                title,
+                description,
+                image: "",
+                creator,
+                owner,
+              };
             }
           })
         );
@@ -70,7 +89,7 @@ const GalleryPage = () => {
   }, [walletClient]);
 
   // Open modal with NFT details
-  const openModal = (nft: any) => {
+  const openModal = (nft: NFTData) => {
     setSelectedNFT(nft);
   };
 
@@ -114,7 +133,7 @@ const GalleryPage = () => {
                 onClick={() => openModal(nft)}
               >
                 <img
-                  src={nft.image} // ✅ Using correct `image` property
+                  src={nft.image}
                   alt={nft.title}
                   className="w-60 h-60 object-cover rounded-lg"
                 />

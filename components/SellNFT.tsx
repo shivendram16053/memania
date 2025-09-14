@@ -5,54 +5,68 @@ import { useAccount, useWalletClient } from "wagmi";
 
 const CA = process.env.NEXT_PUBLIC_SMART_CONTRACT as `0x${string}`;
 
+interface NFTMetadata {
+  tokenId: number;
+  image: string;
+}
+
+interface LoadingState {
+  fetchNFTs: boolean;
+  listing: { [key: number]: boolean };
+  canceling: { [key: number]: boolean };
+}
+
 const SellNFT = () => {
   const { address } = useAccount();
   const [nfts, setNfts] = useState<number[]>([]); // Array of token IDs
-  const [nftData, setNftData] = useState<{ [key: string]: { image: string } }>({});
-  const [prices, setPrices] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState({
+  const [nftData, setNftData] = useState<Record<number, NFTMetadata>>({});
+  const [prices, setPrices] = useState<Record<number, string>>({});
+  const [loading, setLoading] = useState<LoadingState>({
     fetchNFTs: false,
-    listing: {} as { [key: string]: boolean },
-    canceling: {} as { [key: string]: boolean }
+    listing: {},
+    canceling: {},
   });
   const [listedNFTs, setListedNFTs] = useState<Set<number>>(new Set());
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<string>("");
   const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
     const fetchNFTs = async () => {
       if (!walletClient || !address) return;
-      
-      setLoading(prev => ({ ...prev, fetchNFTs: true }));
+
+      setLoading((prev) => ({ ...prev, fetchNFTs: true }));
       try {
         const provider = new BrowserProvider(walletClient);
         const signer = await provider.getSigner();
         const contract = new Contract(CA, MemaniaAbi.abi, signer);
 
         // Fetch owned NFTs
-        const ownedNFTs = await contract.getNFTsByOwner(address);
-        setNfts(ownedNFTs.map((id: any) => Number(id))); // Convert to numbers
+        const ownedNFTs: bigint[] = await contract.getNFTsByOwner(address);
+        const ownedTokenIds = ownedNFTs.map((id) => Number(id));
+        setNfts(ownedTokenIds);
 
         // Fetch metadata for each NFT
-        const metadataPromises = ownedNFTs.map(async (tokenId: any) => {
-          const tokenURI = await contract.tokenURI(tokenId);
+        const metadataPromises = ownedTokenIds.map(async (tokenId) => {
+          const tokenURI: string = await contract.tokenURI(tokenId);
           const response = await fetch(tokenURI);
           const metadata = await response.json();
-          return { tokenId: Number(tokenId), image: metadata.image };
+          return { tokenId, image: metadata.image as string };
         });
 
         const metadataArray = await Promise.all(metadataPromises);
-        const metadataMap = Object.fromEntries(metadataArray.map((data) => [data.tokenId, data]));
+        const metadataMap: Record<number, NFTMetadata> = Object.fromEntries(
+          metadataArray.map((data) => [data.tokenId, data])
+        );
         setNftData(metadataMap);
 
         // Fetch all listed NFTs
-        const listed = await contract.getAllListedNFTs();
-        setListedNFTs(new Set(listed.map((id: any) => Number(id))));
+        const listed: bigint[] = await contract.getAllListedNFTs();
+        setListedNFTs(new Set(listed.map((id) => Number(id))));
       } catch (error) {
         console.error("Error fetching NFTs:", error);
         setMessage("Failed to fetch NFTs");
       } finally {
-        setLoading(prev => ({ ...prev, fetchNFTs: false }));
+        setLoading((prev) => ({ ...prev, fetchNFTs: false }));
       }
     };
     fetchNFTs();
@@ -62,12 +76,12 @@ const SellNFT = () => {
     setPrices((prevPrices) => ({ ...prevPrices, [tokenId]: value }));
   };
 
-  const listNFTForSale = async (tokenId: any) => {
+  const listNFTForSale = async (tokenId: number) => {
     if (!walletClient) return;
     try {
-      setLoading(prev => ({ 
-        ...prev, 
-        listing: { ...prev.listing, [tokenId]: true } 
+      setLoading((prev) => ({
+        ...prev,
+        listing: { ...prev.listing, [tokenId]: true },
       }));
       const provider = new BrowserProvider(walletClient);
       const signer = await provider.getSigner();
@@ -75,29 +89,29 @@ const SellNFT = () => {
       const price = prices[tokenId] || "0";
 
       const priceInNEth = ethers.parseUnits(price, 9);
-  
+
       const tx = await contract.listNFT(tokenId, priceInNEth);
       await tx.wait();
-  
-      setListedNFTs((prev) => new Set(prev).add(Number(tokenId)));
+
+      setListedNFTs((prev) => new Set(prev).add(tokenId));
       setMessage(`NFT ${tokenId} listed successfully!`);
     } catch (error) {
       console.error(error);
       setMessage(`Error listing NFT ${tokenId}`);
     } finally {
-      setLoading(prev => ({ 
-        ...prev, 
-        listing: { ...prev.listing, [tokenId]: false } 
+      setLoading((prev) => ({
+        ...prev,
+        listing: { ...prev.listing, [tokenId]: false },
       }));
     }
   };
 
-  const cancelListing = async (tokenId: any) => {
+  const cancelListing = async (tokenId: number) => {
     if (!walletClient) return;
     try {
-      setLoading(prev => ({ 
-        ...prev, 
-        canceling: { ...prev.canceling, [tokenId]: true } 
+      setLoading((prev) => ({
+        ...prev,
+        canceling: { ...prev.canceling, [tokenId]: true },
       }));
       const provider = new BrowserProvider(walletClient);
       const signer = await provider.getSigner();
@@ -108,7 +122,7 @@ const SellNFT = () => {
 
       setListedNFTs((prev) => {
         const updated = new Set(prev);
-        updated.delete(Number(tokenId));
+        updated.delete(tokenId);
         return updated;
       });
       setMessage(`NFT ${tokenId} unlisted successfully!`);
@@ -116,9 +130,9 @@ const SellNFT = () => {
       console.error(error);
       setMessage(`Error unlisting NFT ${tokenId}`);
     } finally {
-      setLoading(prev => ({ 
-        ...prev, 
-        canceling: { ...prev.canceling, [tokenId]: false } 
+      setLoading((prev) => ({
+        ...prev,
+        canceling: { ...prev.canceling, [tokenId]: false },
       }));
     }
   };
@@ -135,11 +149,14 @@ const SellNFT = () => {
     <div className="grid grid-cols-4 gap-10 w-full rounded-lg">
       {nfts.length === 0 ? (
         <div className="text-center mt-10">
-          <p className="text-black text-3xl">You don't own any NFT</p>
+          <p className="text-black text-3xl">You don&apos;t own any NFT</p>
         </div>
       ) : (
         nfts.map((tokenId) => (
-          <div key={tokenId} className="bg-[#FAEED4] shadow-[-4px_4px_0px_#171717] mb-4 w-72 p-4 rounded relative">
+          <div
+            key={tokenId}
+            className="bg-[#FAEED4] shadow-[-4px_4px_0px_#171717] mb-4 w-72 p-4 rounded relative"
+          >
             {nftData[tokenId]?.image && (
               <img
                 src={nftData[tokenId].image}
@@ -147,9 +164,11 @@ const SellNFT = () => {
                 className="w-full h-auto rounded mb-2"
               />
             )}
-            <p className="text-lg text-black font-semibold">Memania NFT #{tokenId}</p>
+            <p className="text-lg text-black font-semibold">
+              Memania NFT #{tokenId}
+            </p>
 
-            {!listedNFTs.has(Number(tokenId)) ? (
+            {!listedNFTs.has(tokenId) ? (
               <>
                 <input
                   type="number"
